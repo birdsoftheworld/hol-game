@@ -1,3 +1,5 @@
+var editor = false;
+
 var gameWindow = document.getElementById("game");
 var context = gameWindow.getContext("2d");
 
