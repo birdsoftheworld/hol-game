@@ -45,7 +45,7 @@ var properties = {
 };
 
 var timerActive = false;
-var timeLeft = 180;
+var timeLeft = 300;
 var markersLeft = 9;
 var goalFound = false;
 
@@ -126,7 +126,7 @@ function tileActions() {
                 }
             }
             if(property.includes("reset")) {
-                timeLeft = 180;
+                timeLeft = 300;
                 timerActive = false;
             }
             if(property.includes("random")) {
