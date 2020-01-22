@@ -71,6 +71,7 @@ while((Math.abs(randomRoomX) + Math.abs(randomRoomY)) < 5) {
 
 var queuedKey;
 var tickValue = 0;
+var stillValue = 0;
 
 function drawSprite(spriteOffsetX, spriteOffsetY, x, y, rotation) {
     // take 8x8 sprite from tilemap with offset
@@ -271,6 +272,12 @@ function tick() {
             currentRoom[y][x][0] = 9;
         }
     }
+    if(key) {
+        stillValue = 0;
+    }
+    else {
+        stillValue++;
+    }
 
     // changing rooms
     if(y < 0) {
@@ -331,6 +338,7 @@ function tick() {
         }
         if(timeLeft < 0 && !editor) {
             location.reload();
+            clearInterval(tickInterval);
             timeLeft = 0;
         }
         var timeAsString = timeLeft.toString();
@@ -346,6 +354,11 @@ function tick() {
     drawSprite(markersLeft, 1, 0, 10 * 8);
 
     queuedKey = "";
+
+    if(stillValue >= 600 && location.href.match(/demo/)) {
+        location.reload();
+        clearInterval(tickInterval);
+    }
 }
 
 var rooms;
