@@ -32,7 +32,8 @@ var solids = [
 ];
 
 var anim = {
-    26: [[26, 27], 10]
+    26: [[26, 27], 10],
+    45: [[45, 46], 10]
 };
 
 var properties = {
@@ -41,11 +42,12 @@ var properties = {
     29: ["random"],
     30: ["goal"],
     31: ["glitch"],
-    42: ["help"]
+    42: ["help"],
+    43: ["back"]
 };
 
 var timerActive = false;
-var timeLeft = 300;
+var timeLeft = 200;
 var markersLeft = 9;
 var goalFound = false;
 
@@ -62,18 +64,18 @@ var roomPosY = 0;
 var otherRoomPosX = 0;
 var otherRoomPosY = 0;
 
-var randomRoomX = Math.floor(Math.random() * 11 - 5);
-var randomRoomY = Math.floor(Math.random() * 11 - 5);
-while((Math.abs(randomRoomX) + Math.abs(randomRoomY)) < 5) {
-    randomRoomX = Math.floor(Math.random() * 11 - 5);
-    randomRoomY = Math.floor(Math.random() * 11 - 5);
+var randomRoomX = Math.floor(Math.random() * 7 - 3);
+var randomRoomY = Math.floor(Math.random() * 7 - 3);
+while((Math.abs(randomRoomX) + Math.abs(randomRoomY)) < 3) {
+    randomRoomX = Math.floor(Math.random() * 7 - 3);
+    randomRoomY = Math.floor(Math.random() * 7 - 3);
 }
 
 var queuedKey;
 var tickValue = 0;
 var stillValue = 0;
 
-function drawSprite(spriteOffsetX, spriteOffsetY, x, y, rotation) {
+function drawSprite(spriteOffsetX, spriteOffsetY, x, y, rotation, overlays) {
     // take 8x8 sprite from tilemap with offset
     rotation = rotation || 0;
     context.save();
@@ -82,6 +84,11 @@ function drawSprite(spriteOffsetX, spriteOffsetY, x, y, rotation) {
     context.rotate(rotation * Math.PI / 180);
     context.drawImage(tilemap, spriteOffsetX * 8, spriteOffsetY * 8, 8, 8, -4, -4, 8, 8);
     context.restore();
+    if(overlays) {
+        overlays.forEach(item => {
+            context.drawImage(tilemap, item % 32 * 8, Math.floor(item / 32) * 8, 8, 8, x, y, 8, 8);
+        });
+    }
 };
 
 function drawMap(room) {
@@ -92,12 +99,12 @@ function drawMap(room) {
             tileBeingDrawn = room[row][column][0] || room[row][column];
             if(tileBeingDrawn !== -1) {
                 if(!(tileBeingDrawn in anim)) {
-                    drawSprite(tileBeingDrawn % 32, Math.floor(tileBeingDrawn / 32), parseInt(column) * 8, parseInt(row) * 8, room[row][column][1]);
+                    drawSprite(tileBeingDrawn % 32, Math.floor(tileBeingDrawn / 32), parseInt(column) * 8, parseInt(row) * 8, room[row][column][1], room[row][column][2]);
                 }
                 else {
                     var tileAnimation = anim[tileBeingDrawn][0];
                     var animTick = Math.floor(tickValue / anim[tileBeingDrawn][1]);
-                    drawSprite(tileAnimation[Math.floor(animTick % tileAnimation.length)] % 32, Math.floor(tileAnimation[animTick % tileAnimation.length] / 32), parseInt(column) * 8, parseInt(row) * 8, room[row][column][1]);
+                    drawSprite(tileAnimation[Math.floor(animTick % tileAnimation.length)] % 32, Math.floor(tileAnimation[animTick % tileAnimation.length] / 32), parseInt(column) * 8, parseInt(row) * 8, room[row][column][1], room[row][column][2]);
                 }
             }
         }
@@ -106,8 +113,15 @@ function drawMap(room) {
 
 function drawCredits() {
     clearInterval(tickInterval);
-    currentRoom = [[[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]],[[1,0],[115,0],[103,0],[96,0],[109,0],[106,0],[114,0],[1,0],[1,0],[1,0],[1,0]],[[1,0],[101,0],[110,0],[113,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]],[[1,0],[111,0],[107,0],[96,0],[120,0],[104,0],[109,0],[102,0],[122,0],[1,0],[1,0]],[[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]],[[1,0],[108,0],[96,0],[99,0],[100,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]],[[1,0],[97,0],[120,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]],[[1,0],[109,0],[104,0],[106,0],[110,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]],[[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]],[[1,0],[97,0],[120,0],[100,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]],[[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]]];
+    currentRoom = [[[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]],[[1,0],[1,0,[115,115]],[1,0,[103,103,103,103]],[1,0,[96,96,96,96,96,96]],[1,0,[109,109]],[1,0,[106,106,106]],[1,0,[114]],[1,0],[1,0],[1,0],[1,0]],[[1,0],[1,0,[101]],[1,0,[110,110]],[1,0,[113]],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]],[[1,0],[1,0,[111,111]],[1,0,[107,107]],[1,0,[96,96]],[1,0,[120]],[1,0,[104,104]],[1,0,[109,109]],[1,0,[102,102,102]],[1,0,[122,122,122,122]],[1,0],[1,0]],[[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]],[[1,0],[1,0,[108]],[1,0,[96]],[1,0,[99,99,99]],[1,0,[100,100,100,100]],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]],[[1,0],[1,0,[97,97]],[1,0,[120,120]],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]],[[1,0],[1,0,[109]],[1,0,[104,104,104]],[1,0,[106,106]],[1,0,[110,110]],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]],[[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]],[[1,0],[1,0,[47,47,47,47,47,47,47,47,47,47,47]],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]],[[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]]];
     drawMap(currentRoom);
+}
+
+function drawGameover() {
+    clearInterval(tickInterval);
+    currentRoom = [[[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]],[[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]],[[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]],[[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]],[[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]],[[1,0],[1,0,[102,102]],[1,0,[96,96]],[1,0,[108,108,108]],[1,0,[100,100]],[1,0],[1,0,[110]],[1,0,[117]],[1,0,[100]],[1,0,[113]],[1,0]],[[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]],[[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]],[[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]],[[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]],[[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]]];
+    drawMap(currentRoom);
+    setTimeout(() => location.reload(), 2500);
 }
 
 function tileActions() {
@@ -119,22 +133,22 @@ function tileActions() {
                 timerActive = true;
                 if((row == y - 1 || row == y || row == y + 1) && (column == x - 1 || column == x || column == x + 1) || editor || goalFound) {
                     let tileBeingDrawn = currentRoom[row][column][0];
-                    drawSprite(tileBeingDrawn % 32, Math.floor(tileBeingDrawn / 32), parseInt(column) * 8, parseInt(row) * 8, currentRoom[row][column][1]);
+                    drawSprite(tileBeingDrawn % 32, Math.floor(tileBeingDrawn / 32), parseInt(column) * 8, parseInt(row) * 8, currentRoom[row][column][1], currentRoom[row][column][2]);
                 }
                 else {
                     let tileBeingDrawn = currentRoom[row][column][0];
-                    drawSprite(tileBeingDrawn % 32 + 1, Math.floor(tileBeingDrawn / 32), parseInt(column) * 8, parseInt(row) * 8, currentRoom[row][column][1]);
+                    drawSprite(tileBeingDrawn % 32 + 1, Math.floor(tileBeingDrawn / 32), parseInt(column) * 8, parseInt(row) * 8, currentRoom[row][column][1], currentRoom[row][column][2]);
                 }
             }
             if(property.includes("reset")) {
-                timeLeft = 300;
+                timeLeft = 200;
                 timerActive = false;
             }
             if(property.includes("random")) {
                 timerActive = true;
                 if(!editor) {
                     let tileBeingDrawn = 9;
-                    drawSprite(tileBeingDrawn % 32 + 1, Math.floor(tileBeingDrawn / 32), parseInt(column) * 8, parseInt(row) * 8, currentRoom[row][column][1]);
+                    drawSprite(tileBeingDrawn % 32 + 1, Math.floor(tileBeingDrawn / 32), parseInt(column) * 8, parseInt(row) * 8, currentRoom[row][column][1], currentRoom[row][column][2]);
                 }
                 if(!editor) {
                     var isSolid = Math.random() >= 0.5;
@@ -146,8 +160,8 @@ function tileActions() {
                     goalFound = true;
                     currentRoom[row][column] = 9;
                     rooms[[randomRoomX, randomRoomY]] = currentRoom;
-                    roomPosX = Math.floor(Math.random() * 11 - 5);
-                    roomPosY = Math.floor(Math.random() * 11 - 5);
+                    roomPosX = Math.floor(Math.random() * 7 - 3);
+                    roomPosY = Math.floor(Math.random() * 7 - 3);
                     currentRoom = rooms[[roomPosX, roomPosY]];
                     if(!currentRoom) {
                         currentRoom = $.extend(true, [], randomRooms[Math.floor(Math.random() * randomRooms.length)]);
@@ -169,8 +183,16 @@ function tileActions() {
             }
             if(property.includes("help")) {
                 if(row == y && column == x) {
-                    currentRoom[row][column] = 13;
-                    alert("Use arrow keys to move and space to place or pick up a neon marker while in the maze. To win, save your friend and escape.");
+                    roomPosY = roomPosY + 3;
+                    currentRoom = rooms[[roomPosX, roomPosY]];
+                    return;
+                }
+            }
+            if(property.includes("back")) {
+                if(row == y && column == x) {
+                    roomPosY = roomPosY - 1;
+                    currentRoom = rooms[[roomPosX, roomPosY]];
+                    return;
                 }
             }
         }
@@ -215,7 +237,7 @@ function tick() {
             if(!(solids.includes(currentRoom[y][x - 1][0]))) {
                 x -= 1;
             }
-            if((currentRoom[y][x][0]) == 26) {
+            if((currentRoom[y][x][0]) == 26 || (currentRoom[y][x][0]) == 45) {
                 changeDimension();
             }
         }
@@ -228,7 +250,7 @@ function tick() {
             if(!(solids.includes(currentRoom[y - 1][x][0]))) {
                 y -= 1;
             }
-            if((currentRoom[y][x][0]) == 26) {
+            if((currentRoom[y][x][0]) == 26 || (currentRoom[y][x][0]) == 45) {
                 changeDimension();
             }
         }
@@ -241,7 +263,7 @@ function tick() {
             if(!(solids.includes(currentRoom[y][x + 1][0]))) {
                 x += 1;
             }
-            if((currentRoom[y][x][0]) == 26) {
+            if((currentRoom[y][x][0]) == 26 || (currentRoom[y][x][0]) == 45) {
                 changeDimension();
             }
         }
@@ -254,7 +276,7 @@ function tick() {
             if(!(solids.includes(currentRoom[y + 1][x][0]))) {
                 y += 1;
             }
-            if((currentRoom[y][x][0]) == 26) {
+            if((currentRoom[y][x][0]) == 26 || (currentRoom[y][x][0]) == 45) {
                 changeDimension();
             }
         }
@@ -263,13 +285,13 @@ function tick() {
         }
     }
     if(key == " ") {
-        if(markersLeft > 0 && currentRoom[y][x][0] == 9) {
+        if(markersLeft > 0 && !currentRoom[y][x][2]) {
             markersLeft--;
-            currentRoom[y][x][0] = 28;
+            currentRoom[y][x][2] = [28];
         }
-        else if (currentRoom[y][x][0] == 28) {
+        else if (currentRoom[y][x][2] == 28) {
             markersLeft++;
-            currentRoom[y][x][0] = 9;
+            currentRoom[y][x][2].pop();
         }
     }
     if(key) {
@@ -315,16 +337,16 @@ function tick() {
         }
     }
     if(dimension == 1) {
-        if(roomPosX >= 5) {
+        if(roomPosX >= 3) {
             currentRoom[5][10][0] = 10;
         }
-        if(roomPosX <= -5) {
+        if(roomPosX <= -3) {
             currentRoom[5][0][0] = 10;
         }
-        if(roomPosY >= 5) {
+        if(roomPosY >= 3) {
             currentRoom[10][5][0] = 10;
         }
-        if(roomPosY <= -5) {
+        if(roomPosY <= -3) {
             currentRoom[0][5][0] = 10;
         }
     }
@@ -333,13 +355,11 @@ function tick() {
     drawSprite(2, 0, x * 8, y * 8);
 
     if(timerActive) {
-        if(!(tickValue % (goalFound? 15 : 20))) {
+        if(!(tickValue % (goalFound? 10 : 20))) {
             timeLeft -= 1;
         }
         if(timeLeft < 0 && !editor) {
-            location.reload();
-            clearInterval(tickInterval);
-            timeLeft = 0;
+            drawGameover();
         }
         var timeAsString = timeLeft.toString();
         for(var i = timeAsString.length; i > 0; i--) {
@@ -352,6 +372,7 @@ function tick() {
     }
 
     drawSprite(markersLeft, 1, 0, 10 * 8);
+    drawSprite(28, 0, 8, 10 * 8);
 
     queuedKey = "";
 
